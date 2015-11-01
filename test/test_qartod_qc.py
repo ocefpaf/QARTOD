@@ -1,4 +1,5 @@
 import numpy as np
+import numpy.ma as ma
 import numpy.testing as npt
 import pandas as pd
 from ioos_qartod.qc_tests import qc
@@ -200,3 +201,47 @@ class QartodQcTest(unittest.TestCase):
         primary_flags = qc.qc_compare([range_flags, spike_flags, grdtn_flags])
         np.testing.assert_array_equal(primary_flags,
                                       np.array([1, 3, 3, 4, 3, 1, 2, 9]))
+
+    def test_current_direction_check(self):
+        """
+        See if user and current direction fall between a valid range for
+        float input.
+
+        """
+        vals = np.array([0, -1, 5, 110, 360, 250, 360.01, 1e3, 1],
+                        dtype=float)
+        expected = np.array([1, 4, 1, 1, 1, 1, 4, 4, 1])
+        npt.assert_array_equal(qc.current_direction_check(vals), expected)
+
+    def test_current_direction_check_ints(self):
+        """
+        See if user and current direction fall between a valid range for
+        integer input.
+
+        """
+        vals = np.array([0, -1, 5, 110, 360, 250, 360, 1000, 1], dtype=int)
+        expected = np.array([1, 4, 1, 1, 1, 1, 1, 4, 1])
+        npt.assert_array_equal(qc.current_direction_check(vals), expected)
+
+    def test_current_direction_check_invalid(self):
+        """
+        See if user and current direction fall between a valid range for
+        invalid input. (Assumes NaNs should pass as "valid.")
+
+        """
+        vals = np.array([0, np.NaN, 5, -np.inf, 360, 250, 360.5, np.inf, 1])
+        expected = np.array([1, 1, 1, 4, 1, 1, 4, 4, 1])
+        npt.assert_array_equal(qc.current_direction_check(vals), expected)
+
+    def test_current_direction_check_masked(self):
+        """
+        See if user and current direction fall between a valid range for
+        masked input.
+        NOTE: This tests fails on purpose to raise that question:
+              Should we support masked arrays?
+
+        """
+        invalid = np.array([0, np.NaN, 5, 110, 360, 250, 360, np.inf, 1])
+        vals = ma.masked_invalid(invalid)
+        expected = np.array([1, 1, 1, 4, 1, 1, 4, 4, 1])
+        npt.assert_array_equal(qc.current_direction_check(vals), expected)

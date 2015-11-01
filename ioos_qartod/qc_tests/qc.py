@@ -224,7 +224,8 @@ def flat_line_check(arr, low_reps, high_reps, eps, prev_qc=None):
 
 
 @add_qartod_ident(16, 'Time Series Flat Line Test')
-def time_series_flat_line_check(arr, low_reps=3, high_reps=5, eps=None, prev_qc=None):
+def time_series_flat_line_check(arr, low_reps=3, high_reps=5, eps=None,
+                                prev_qc=None):
     """
     Check for invariate observations and can be applied to all bulk wave
     parameters.
@@ -278,6 +279,19 @@ def attenuated_signal_check(arr, times, min_var_warn, min_var_fail,
         flag_arr[time_idx] = QCFlags.SUSPECT
     else:
         flag_arr[time_idx] = QCFlags.GOOD_DATA
+    return flag_arr
+
+
+@add_qartod_ident(11, 'Current Direction')
+def current_direction_check(arr, sensor_min=0.0, sensor_max=360.0):
+    """
+    Ensure current direction values fall between 0 and 360 degrees.
+
+    """
+    flag_arr = np.ones_like(arr, dtype='uint8')
+
+    flag_arr[(arr < sensor_min) |
+             (arr > sensor_max)] = QCFlags.BAD_DATA
     return flag_arr
 
 
