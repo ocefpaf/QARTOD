@@ -232,16 +232,3 @@ class QartodQcTest(unittest.TestCase):
         vals = np.array([0, np.NaN, 5, -np.inf, 360, 250, 360.5, np.inf, 1])
         expected = np.array([1, 1, 1, 4, 1, 1, 4, 4, 1])
         npt.assert_array_equal(qc.current_direction_check(vals), expected)
-
-    def test_current_direction_check_masked(self):
-        """
-        See if user and current direction fall between a valid range for
-        masked input.
-        NOTE: This tests fails on purpose to raise that question:
-              Should we support masked arrays?
-
-        """
-        invalid = np.array([0, np.NaN, 5, 110, 360, 250, 360, np.inf, 1])
-        vals = ma.masked_invalid(invalid)
-        expected = np.array([1, 1, 1, 4, 1, 1, 4, 4, 1])
-        npt.assert_array_equal(qc.current_direction_check(vals), expected)
